@@ -4,12 +4,11 @@ function Form() {
 
   const [name, setName] = useState( sessionStorage.getItem("name") ? sessionStorage.getItem("name") : '' );
 
-  
-
- 
   const [email, setEmail] = useState(sessionStorage.getItem("email") ? sessionStorage.getItem("email") : '' );
-  const [profession, setProfession] = useState( sessionStorage.getItem("profession") ? sessionStorage.getItem("profession") : 'farmer' );
 
+  const [profession, setProfession] = useState( sessionStorage.getItem("profession") ? sessionStorage.getItem("profession") : 'Manufacturing' );
+
+  const [allSectors,setAllSectors]=useState([]);
 
   useEffect(()=>{
 
@@ -42,13 +41,41 @@ function Form() {
     }
   },[])
 
+  useEffect(()=>{
+    fetch("http://localhost:5000/userSector")
+    .then(res=>res.json())
+    .then(data=>setAllSectors(data))
+  },[])
+
+// console.log(allSectors);
 
   // Handle form submission
   function handleSubmit(event) {
     event.preventDefault();
-    alert("Want to submit data?")
+    
     // Do something with the form data, e.g. send it to a server
-    console.log({ name, email, profession });
+    const submittedData={name,email,profession};
+    
+    // submitted Data Sending to the database
+
+    fetch('http://localhost:5000/users',{
+    method:'POST',
+    headers:{
+      'content-type':'application/json'
+    },
+    body: JSON.stringify(submittedData)
+    })
+    .then(res=>res.json())
+    .then(dataConfirmation=>{
+     
+      if(dataConfirmation.acknowledged){
+      alert("your data is submitted!!")
+       
+      // Save form data to session storage
+    sessionStorage.setItem("mongodb_insertedId",(dataConfirmation.insertedId));
+    
+      }
+    })
     
   }
 
@@ -77,10 +104,12 @@ function Form() {
         Select Your Profession:
         </label>
         <select required defaultValue={profession} onChange={(e) => setProfession(e.target.value)}>
-          <option value="farmer">Farmer</option>
-          <option value="teacher">Teacher</option>
-          <option value="businessman">BusinessMan</option>
-          <option value="web developer">web developer</option>
+         { 
+         allSectors.map((pd)=> <option key={pd._id} value={pd.sector}>{pd.sector}</option>)
+        
+         
+         }
+          
         </select>
       
       </p>
