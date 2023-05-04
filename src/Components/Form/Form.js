@@ -2,9 +2,46 @@ import React, { useState,useEffect } from 'react'
 
 function Form() {
 
-  const [name, setName] = useState('' || sessionStorage.getItem("name"));
-  const [email, setEmail] = useState('' || sessionStorage.getItem("email"));
-  const [profession, setProfession] = useState( sessionStorage.getItem("profession"));
+  const [name, setName] = useState( sessionStorage.getItem("name") ? sessionStorage.getItem("name") : '' );
+
+  
+
+ 
+  const [email, setEmail] = useState(sessionStorage.getItem("email") ? sessionStorage.getItem("email") : '' );
+  const [profession, setProfession] = useState( sessionStorage.getItem("profession") ? sessionStorage.getItem("profession") : 'farmer' );
+
+
+  useEffect(()=>{
+
+    window.sessionStorage.setItem('name',name);
+  window.sessionStorage.setItem('email',email);
+  window.sessionStorage.setItem('profession',profession);
+
+  // const allData={'name':name,'email':email,'message':message};
+  // const myObjString=JSON.stringify(allData);
+  // window.sessionStorage.setItem("myObj",myObjString)
+
+  },[name,email,profession])
+
+
+  // pre-populate input field with stored data...
+  useEffect(()=>{
+    const storedName= sessionStorage.getItem('name');
+    const storedEmail=sessionStorage.getItem('email');
+    const storedProfession=sessionStorage.getItem('profession');
+
+    if(storedName){
+      setName(storedName)
+    }
+    
+    if(storedEmail){
+      setEmail(storedEmail)
+    }
+    if(storedProfession){
+      setProfession(storedProfession)
+    }
+  },[])
+
 
   // Handle form submission
   function handleSubmit(event) {
@@ -15,34 +52,8 @@ function Form() {
     
   }
 
-    useEffect(()=>{
-
-      window.sessionStorage.setItem('name',name);
-    window.sessionStorage.setItem('email',email);
-    window.sessionStorage.setItem('profession',profession);
-
-    // const allData={'name':name,'email':email,'message':message};
-    // const myObjString=JSON.stringify(allData);
-    // window.sessionStorage.setItem("myObj",myObjString)
-
-    },[name,email,profession])
-
-    // pre-populate input field with stored data...
-    useEffect(()=>{
-      const storedName= sessionStorage.getItem('name');
-      const storedEmail=sessionStorage.getItem('email');
-      const storedProfession=sessionStorage.getItem('profession');
-
-      if(storedName){
-        setName(storedName)
-      }
-      if(storedEmail){
-        setEmail(storedEmail)
-      }
-      if(storedProfession){
-        setProfession(storedProfession)
-      }
-    },[])
+    
+    
 
   return (
     <form type="form" onSubmit={handleSubmit}>
@@ -50,7 +61,7 @@ function Form() {
       <label>
         Name:
         </label>
-        <input required type="text" value={name} onChange={(e) => setName(e.target.value)} />
+        <input placeholder='enter your name' required type="text" defaultValue={  name } onChange={(e) => setName(e.target.value)} />
       
       </p>
 
@@ -58,14 +69,14 @@ function Form() {
       <label>
         Email:
         </label>
-        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input placeholder='enter your email' required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
      
       </p>
       <p>
       <label>
         Select Your Profession:
         </label>
-        <select required value={profession} onChange={(e) => setProfession(e.target.value)}>
+        <select required defaultValue={profession} onChange={(e) => setProfession(e.target.value)}>
           <option value="farmer">Farmer</option>
           <option value="teacher">Teacher</option>
           <option value="businessman">BusinessMan</option>
