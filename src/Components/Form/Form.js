@@ -1,30 +1,56 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 
 function Form() {
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [name, setName] = useState('' || sessionStorage.getItem("name"));
+  const [email, setEmail] = useState('' || sessionStorage.getItem("email"));
+  const [profession, setProfession] = useState( sessionStorage.getItem("profession"));
 
   // Handle form submission
   function handleSubmit(event) {
     event.preventDefault();
+    alert("Want to submit data?")
     // Do something with the form data, e.g. send it to a server
-    console.log({ name, email, message });
+    console.log({ name, email, profession });
     
   }
 
-  sessionStorage.setItem('name',name);
-    sessionStorage.setItem('email',email);
-    sessionStorage.setItem('message',message)
+    useEffect(()=>{
+
+      window.sessionStorage.setItem('name',name);
+    window.sessionStorage.setItem('email',email);
+    window.sessionStorage.setItem('profession',profession);
+
+    // const allData={'name':name,'email':email,'message':message};
+    // const myObjString=JSON.stringify(allData);
+    // window.sessionStorage.setItem("myObj",myObjString)
+
+    },[name,email,profession])
+
+    // pre-populate input field with stored data...
+    useEffect(()=>{
+      const storedName= sessionStorage.getItem('name');
+      const storedEmail=sessionStorage.getItem('email');
+      const storedProfession=sessionStorage.getItem('profession');
+
+      if(storedName){
+        setName(storedName)
+      }
+      if(storedEmail){
+        setEmail(storedEmail)
+      }
+      if(storedProfession){
+        setProfession(storedProfession)
+      }
+    },[])
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form type="form" onSubmit={handleSubmit}>
       <p>
       <label>
         Name:
         </label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+        <input required type="text" value={name} onChange={(e) => setName(e.target.value)} />
       
       </p>
 
@@ -32,14 +58,19 @@ function Form() {
       <label>
         Email:
         </label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
      
       </p>
       <p>
       <label>
-        Message:
+        Select Your Profession:
         </label>
-        <textarea value={message} onChange={(e) => setMessage(e.target.value)} />
+        <select required value={profession} onChange={(e) => setProfession(e.target.value)}>
+          <option value="farmer">Farmer</option>
+          <option value="teacher">Teacher</option>
+          <option value="businessman">BusinessMan</option>
+          <option value="web developer">web developer</option>
+        </select>
       
       </p>
       <button type="submit">Submit</button>
