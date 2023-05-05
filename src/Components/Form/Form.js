@@ -48,39 +48,39 @@ function Form() {
     .then(data=>setAllSectors(data))
   },[])
 
-// console.log(allSectors);
+// Updating user function::::::::::
+function UpdatingUser(mongodbInsertedID,submittedData){
+  fetch(`http://localhost:5000/users/${mongodbInsertedID}`,{
+    method:"PUT",
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify(submittedData)
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    console.log(data);
+    if(data.modifiedCount===1 ){
+     alert("You have updated data")
+      
+    }
+    
+    
+  })
+}
 
   // Handle form submission
-  function handleSubmit(event) {
+  function HandleSubmit(event) {
     event.preventDefault();
     
     // Do something with the form data, e.g. send it to a server
     const submittedData={name,checkBox,profession};
     
-  if(mongodbInsertedID){
+  if(mongodbInsertedID ){
     console.log("your inserted id is", mongodbInsertedID);
 
-
-    fetch(`http://localhost:5000/users/${mongodbInsertedID}`,{
-          method:"PUT",
-          headers: {
-            'content-type': 'application/json'
-          },
-          body: JSON.stringify(submittedData)
-        })
-        .then(res=>res.json())
-        .then(data=>{
-          console.log(data);
-          if(data.modifiedCount>0 ){
-           alert("You have updated data")
-            
-          }
-          if(data.modifiedCount===0){
-            alert("You haven't updated anything");
-            
-          }
-        })
-       
+    UpdatingUser(mongodbInsertedID,submittedData)
+  
   }
 
   else{
@@ -110,10 +110,13 @@ function Form() {
     
   }
 
-    
+    // useEffect(()=>{
+    //   setProfession(sessionStorage.getItem("profession"))
+    //   console.log(profession)
+    // },[profession])
     
   return (
-    <form type="form" onSubmit={handleSubmit}>
+    <form type="form" onSubmit={HandleSubmit}>
       <p>
       <label>
         Name:
@@ -127,6 +130,7 @@ function Form() {
       <label>
         Select Your Profession:
         </label>
+
         <select required defaultValue={profession} onChange={(e) => setProfession(e.target.value)}>
          { 
          allSectors.map((pd)=> <option key={pd._id} value={ pd.sector}>{pd.sector}</option>)
