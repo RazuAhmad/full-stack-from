@@ -1,40 +1,41 @@
 import React, { useState,useEffect } from 'react'
 
 function Form() {
-
+  const [allSectors,setAllSectors]=useState([]);
+  
   const [name, setName] = useState( sessionStorage.getItem("name") ? sessionStorage.getItem("name") : '' );
 
-  const [email, setEmail] = useState(sessionStorage.getItem("email") ? sessionStorage.getItem("email") : '' );
+  const [checkBox, setCheckBox] = useState(sessionStorage.getItem("checkbox") ? sessionStorage.getItem("checkbox") : "" );
 
   const [profession, setProfession] = useState( sessionStorage.getItem("profession") ? sessionStorage.getItem("profession") : 'Manufacturing' );
 
-  const [allSectors,setAllSectors]=useState([]);
+  const [mongodbInsertedID,setMongodbInsertedID]=useState(sessionStorage.getItem("mongodb_insertedId") ? sessionStorage.getItem("mongodb_insertedId") : '')
 
   useEffect(()=>{
 
     window.sessionStorage.setItem('name',name);
-  window.sessionStorage.setItem('email',email);
+  window.sessionStorage.setItem('checkbox',checkBox);
   window.sessionStorage.setItem('profession',profession);
 
   // const allData={'name':name,'email':email,'message':message};
   // const myObjString=JSON.stringify(allData);
   // window.sessionStorage.setItem("myObj",myObjString)
 
-  },[name,email,profession])
+  },[name,checkBox,profession])
 
 
   // pre-populate input field with stored data...
   useEffect(()=>{
     const storedName= sessionStorage.getItem('name');
-    const storedEmail=sessionStorage.getItem('email');
+    const storedCheckBox=sessionStorage.getItem('checkbox');
     const storedProfession=sessionStorage.getItem('profession');
 
     if(storedName){
       setName(storedName)
     }
     
-    if(storedEmail){
-      setEmail(storedEmail)
+    if(storedCheckBox){
+      setCheckBox(storedCheckBox)
     }
     if(storedProfession){
       setProfession(storedProfession)
@@ -54,34 +55,63 @@ function Form() {
     event.preventDefault();
     
     // Do something with the form data, e.g. send it to a server
-    const submittedData={name,email,profession};
+    const submittedData={name,checkBox,profession};
     
-    // submitted Data Sending to the database
+  if(mongodbInsertedID){
+    console.log("your inserted id is", mongodbInsertedID);
 
-    fetch('http://localhost:5000/users',{
-    method:'POST',
-    headers:{
-      'content-type':'application/json'
-    },
-    body: JSON.stringify(submittedData)
-    })
-    .then(res=>res.json())
-    .then(dataConfirmation=>{
-     
-      if(dataConfirmation.acknowledged){
-      alert("your data is submitted!!")
+
+    fetch(`http://localhost:5000/users/${mongodbInsertedID}`,{
+          method:"PUT",
+          headers: {
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify(submittedData)
+        })
+        .then(res=>res.json())
+        .then(data=>{
+          console.log(data);
+          if(data.modifiedCount>0 ){
+           alert("You have updated data")
+            
+          }
+          if(data.modifiedCount===0){
+            alert("You haven't updated anything");
+            
+          }
+        })
        
-      // Save form data to session storage
-    sessionStorage.setItem("mongodb_insertedId",(dataConfirmation.insertedId));
-    
-      }
-    })
+  }
+
+  else{
+
+      // submitted Data Sending to the database
+
+      fetch('http://localhost:5000/users',{
+        method:'POST',
+        headers:{
+          'content-type':'application/json'
+        },
+        body: JSON.stringify(submittedData)
+        })
+        .then(res=>res.json())
+        .then(dataConfirmation=>{
+         
+          if(dataConfirmation.acknowledged){
+          alert("your data is submitted!!")
+           
+          // Save form data to session storage
+        sessionStorage.setItem("mongodb_insertedId",(dataConfirmation.insertedId));
+        setMongodbInsertedID(dataConfirmation.insertedId)
+          }
+        })
+
+  }
     
   }
 
     
     
-
   return (
     <form type="form" onSubmit={handleSubmit}>
       <p>
@@ -92,20 +122,14 @@ function Form() {
       
       </p>
 
-      <p>
-      <label>
-        Email:
-        </label>
-        <input placeholder='enter your email' required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-     
-      </p>
+      
       <p>
       <label>
         Select Your Profession:
         </label>
         <select required defaultValue={profession} onChange={(e) => setProfession(e.target.value)}>
          { 
-         allSectors.map((pd)=> <option key={pd._id} value={pd.sector}>{pd.sector}</option>)
+         allSectors.map((pd)=> <option key={pd._id} value={ pd.sector}>{pd.sector}</option>)
         
          
          }
@@ -113,6 +137,13 @@ function Form() {
         </select>
       
       </p>
+
+      <p>
+         
+         <input className='w-4 h-4' id='checkbox' onChange={(e) => setCheckBox(!checkBox)} required  type="checkbox"  />
+         <label htmlFor="checkbox" className='text-white ml-2'>Agree to Terms & Conditions</label>  
+         </p>
+
       <button type="submit">Submit</button>
     </form>
   )
